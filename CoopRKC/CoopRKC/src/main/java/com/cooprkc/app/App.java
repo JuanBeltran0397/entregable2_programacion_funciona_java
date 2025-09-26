@@ -76,13 +76,13 @@ public class App {
         Socio socio = buscarSocio();
         if (socio == null) return;
         String numCuenta = leerTexto("Número de cuenta: ");
-        Cuenta cuenta = socio.getCuenta(numCuenta);
+        Cuenta cuenta = socio.getCuenta(numCuenta);// buscamos la cuenta del socio
         if (cuenta == null) {
             System.out.println("No existe esa cuenta.");
             return;
         }
         double monto = leerDouble("Monto a depositar: ");
-        new Deposito(monto).ejecutar(cuenta);
+        new Deposito(monto).ejecutar(cuenta);// realizamos el depósito
         System.out.println("Depósito realizado. Nuevo saldo: " + String.format("%,.2f", cuenta.getSaldo()));
     }
 
@@ -90,14 +90,14 @@ public class App {
         Socio socio = buscarSocio();
         if (socio == null) return;
         String numCuenta = leerTexto("Número de cuenta: ");
-        Cuenta cuenta = socio.getCuenta(numCuenta);
+        Cuenta cuenta = socio.getCuenta(numCuenta);// buscamos la cuenta del socio
         if (cuenta == null) {
             System.out.println("No existe esa cuenta.");
             return;
         }
         double monto = leerDouble("Monto a retirar: ");
         try {
-            new Retiro(monto).ejecutar(cuenta);
+            new Retiro(monto).ejecutar(cuenta);// realizamos el retiro
             System.out.println("Retiro realizado. Nuevo saldo: " + String.format("%,.2f", cuenta.getSaldo()));
         } catch (SaldoInsuficienteException e) {
             System.out.println("[ERROR] " + e.getMessage());
@@ -112,10 +112,10 @@ public class App {
     // - A esas cuentas les aplicamos el método aplicarInteres().
 
     private static void aplicarInteres() {
-        coop.getSocios().forEach(s ->
-                s.getCuentas().forEach(c -> {
-                    if (c instanceof CuentaAhorros ca) {
-                        ca.aplicarInteres();
+        coop.getSocios().forEach(s ->// recorremos cada socio
+                s.getCuentas().forEach(c -> {// por cada socio, recorremos sus cuentas
+                    if (c instanceof CuentaAhorros ca) {// usamos pattern matching para identificar cuentas de ahorro
+                        ca.aplicarInteres();// aplicamos el interés
                     }
                 })
         );
@@ -124,10 +124,10 @@ public class App {
 
     private static void listarSocios() {
         System.out.println("\n*** SOCIOS Y CUENTAS ***");
-        coop.getSocios().forEach(s -> {
-            System.out.println("* " + s.getNombre() + " (" + s.getCedula() + ")");
-            s.getCuentas().forEach(c ->
-                    System.out.println("   - " + c)
+        coop.getSocios().forEach(s -> {// recorremos cada socio
+            System.out.println("* " + s.getNombre() + " (" + s.getCedula() + ")");// imprimimos datos del socio
+            s.getCuentas().forEach(c ->// por cada socio, recorremos sus cuentas
+                    System.out.println("   - " + c)// imprimimos datos de la cuenta
             );
         });
     }
@@ -138,31 +138,31 @@ public class App {
 
         // 1) Cuentas con saldo > 500.000
         var ricas = coop.getSocios().stream()
-                .flatMap(s -> s.getCuentas().stream())
-                .filter(c -> c.getSaldo() > 500_000)
-                .sorted(Comparator.comparingDouble(Cuenta::getSaldo).reversed())
-                .collect(Collectors.toList());
+                .flatMap(s -> s.getCuentas().stream())// creamos un stream con todas las cuentas de todos los socios
+                .filter(c -> c.getSaldo() > 500_000)// filtramos cuentas con saldo > 500.000-operación intermedia
+                .sorted(Comparator.comparingDouble(Cuenta::getSaldo).reversed())//creamos un comparador que usa como criterio el saldo y .sorted lo ordena de menor a mayor
+                .collect(Collectors.toList());// agregamos el nuevo orden a una lista para luego imprimirla
         System.out.println("Cuentas con saldo > 500.000:");
         ricas.forEach(c ->
-                System.out.println(" " + c.getNumeroCuenta() + " -> $" + String.format("%,.2f", c.getSaldo()))
+                System.out.println(" " + c.getNumeroCuenta() + " -> $" + String.format("%,.2f", c.getSaldo()))// operacion final de impresión por consola de datos que cumplen la condición
         );
 
         // 2) Total en la cooperativa
         double total = coop.getSocios().stream()
-                .flatMap(s -> s.getCuentas().stream())
-                .map(Cuenta::getSaldo)
-                .reduce(0.0, Double::sum);
-        System.out.println("Total en la cooperativa: $" + String.format("%,.2f", total));
+                .flatMap(s -> s.getCuentas().stream())// creamos un stream con todas las cuentas de todos los socios
+                .map(Cuenta::getSaldo)// obtenemos el saldo de cada cuenta
+                .reduce(0.0, Double::sum);// sumamos todos los saldos, partiendo de 0.0
+        System.out.println("Total en la cooperativa: $" + String.format("%,.2f", total));// impresión del total formateado
     }
 
     // =================== utilidades ===================
 
     private static Socio buscarSocio() {
         String cedula = leerTexto("Ingrese cédula del socio: ");
-        return coop.getSocios().stream()
+        return coop.getSocios().stream()// usamos stream para buscar el socio por cédula
                 .filter(s -> s.getCedula().equals(cedula))
-                .findFirst()
-                .orElseGet(() -> {
+                .findFirst()// buscamos el primer elemento que cumpla la condición
+                .orElseGet(() -> {// si no se encuentra, mostramos mensaje y retornamos null
                     System.out.println("Socio no encontrado.");
                     return null;
                 });
